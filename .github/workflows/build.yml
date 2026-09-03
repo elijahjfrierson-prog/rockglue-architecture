@@ -1,0 +1,77 @@
+name: Build plugin artifacts
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS (VST3 + AU)
+            os: macos-14
+            artifact: RockGlue-Architecture-macOS
+          - name: Windows (VST3)
+            os: windows-2022
+            artifact: RockGlue-Architecture-Windows-x64
+          - name: Linux (VST3)
+            os: ubuntu-22.04
+            artifact: RockGlue-Architecture-Linux-x86_64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2-dev libx11-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libfreetype6-dev libfontconfig1-dev \
+            libgl1-mesa-dev libxrender-dev libxcomposite-dev libxext-dev
+
+      - name: Configure (macOS, universal)
+        if: runner.os == 'macOS'
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+                -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+
+      - name: Configure (Linux)
+        if: runner.os == 'Linux'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: cmake -S . -B build -A x64
+
+      # Each format compiles the whole of JUCE; cap the job count so hosted
+      # runners don't run out of memory.
+      - name: Build
+        run: cmake --build build --config Release --parallel 2
+
+      - name: Tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Stage artifacts
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          cp -R build/RockGlue_artefacts/Release/VST3/*.vst3 artifacts/
+          if [ -d build/RockGlue_artefacts/Release/AU ]; then
+            cp -R build/RockGlue_artefacts/Release/AU/*.component artifacts/
+          fi
+          cp -R build/RockGlue_artefacts/Release/Standalone/* artifacts/ || true
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: artifacts/
+          if-no-files-found: error
