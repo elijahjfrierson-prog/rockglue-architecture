@@ -199,7 +199,7 @@ RockGlueEditor::RockGlueEditor(RockGlueProcessor& p)
 
     nodes[0] = { "DRUM BUS", "Smasher  |  FET 4:1  0.05 ms / 50 ms", {} };
     nodes[1] = { "BASS BUS", "Low-End Anchor  |  M/S", {} };
-    nodes[2] = { "GTR / VOX", "The Pocket  |  2.5 kHz Q 1.0  (M/S on master)", {} };
+    nodes[2] = { "GTR / VOX", "The Pocket  |  2.5 kHz Q 1.0  |  M/S", {} };
     nodes[3] = { "MASTER", "VCA Glue  |  2:1  30 ms  soft knee", {} };
 
     inputMode.addItemList({ "Master", "4-Bus Stems" }, 1);
