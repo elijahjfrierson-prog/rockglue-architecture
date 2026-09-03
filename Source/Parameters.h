@@ -4,7 +4,7 @@
 
 namespace rockglue::pid
 {
-inline constexpr const char* inputMode    = "inputMode";     // 0 = Stereo Mix, 1 = 4-Bus
+inline constexpr const char* inputMode    = "inputMode";     // 0 = Master (stereo 2-bus insert), 1 = 4-Bus Stems
 inline constexpr const char* drumDrive    = "drumDrive";     // dB
 inline constexpr const char* drumMix      = "drumMix";       // %
 inline constexpr const char* monoLock     = "monoLock";      // bool
@@ -31,7 +31,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
 
     p.push_back(std::make_unique<AudioParameterChoice>(
         ParameterID { pid::inputMode, 1 }, "Input Mode",
-        StringArray { "Stereo Mix", "4-Bus" }, 0));
+        StringArray { "Master", "4-Bus Stems" }, 0));
 
     p.push_back(std::make_unique<AudioParameterFloat>(
         ParameterID { pid::drumDrive, 1 }, "Drum Drive",

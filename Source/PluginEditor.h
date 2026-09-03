@@ -78,6 +78,7 @@ private:
     };
 
     void timerCallback() override;
+    bool lastFourBusShown = false;
     void setupSlider(juce::Slider&, juce::Label&, const juce::String& name, juce::Slider::SliderStyle);
     void layoutControl(juce::Rectangle<int> area, juce::Component& control, juce::Label& label);
 

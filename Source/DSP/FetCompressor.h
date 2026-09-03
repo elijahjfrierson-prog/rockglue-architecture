@@ -64,13 +64,16 @@ public:
 
         const float envDb = gainToDb(envelope);
         const float over = envDb - kThresholdDb;
+        // In a feedback design the detector sees the already-reduced output,
+        // so the loop needs (ratio - 1) dB of reduction per dB of overshoot
+        // for the input/output slope to settle at the nominal ratio.
         float grDb = 0.0f;
         if (over > kKneeDb * 0.5f)
-            grDb = over * (1.0f - 1.0f / kRatio);
+            grDb = over * (kRatio - 1.0f);
         else if (over > -kKneeDb * 0.5f)
         {
             const float t = over + kKneeDb * 0.5f;
-            grDb = (1.0f - 1.0f / kRatio) * t * t / (2.0f * kKneeDb);
+            grDb = (kRatio - 1.0f) * t * t / (2.0f * kKneeDb);
         }
 
         // Feedback compressors converge on the reduction rather than hitting

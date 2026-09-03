@@ -18,19 +18,19 @@ Vocals  -> Pocket boost   (+2 dB, Q 1.0 @ 2.5 kHz, scaled by Carve Pocket)
 
 The plug-in declares one main stereo input plus three optional stereo inputs.
 
-| Bus | Stereo Mix mode | 4-Bus mode |
+| Bus | Master mode | 4-Bus mode |
 | --- | --- | --- |
 | 0 `Drums / Mix` | full mix | drums |
 | 1 `Bass` | ignored | bass (sidechain input) |
 | 2 `Guitars` | ignored | guitars (sidechain input) |
 | 3 `Vocals` | ignored | vocals (sidechain input) |
 
-* **Stereo Mix** — the mix runs Anchor → Smasher (as a parallel bus smash) →
+* **Master** (default, 2-bus insert) — the mix runs Anchor → Pocket (M/S: +2 dB Mid / -2 dB Side @ 2.5 kHz) → Smasher (as a parallel bus smash) →
   Glue. The Pocket is skipped: a cut and a boost on the same signal cancel.
 * **4-Bus** — each input goes through its own node, the four lines sum and hit
   the Glue. Buses the host leaves disconnected are treated as silent.
 
-In hosts with a single sidechain slot, use the Stereo Mix mode or run several
+In hosts with a single sidechain slot, use Master mode or run several
 instances; in hosts that expose all aux inputs (Reaper, Bitwig, Logic AU
 multi-input), route each stem to its named bus.
 
@@ -59,7 +59,7 @@ tests/
 
 | ID | Name | Range | Node |
 | --- | --- | --- | --- |
-| `inputMode` | Input Mode | Stereo Mix / 4-Bus | routing |
+| `inputMode` | Input Mode | Master / 4-Bus Stems | routing |
 | `drumDrive` | Drum Drive | 0 .. +30 dB | Smasher |
 | `drumMix` | Parallel Mix | 0 .. 100 % | Smasher |
 | `monoLock` | Mono Lock | on/off | Anchor |

@@ -5,6 +5,10 @@
 // depth 0..100 % -> 0..2 dB. Because both are minimum-phase biquads of equal Q
 // and opposite gain, their phase shifts are near-complementary and the summed
 // result stays coherent.
+//
+// On a finished stereo mix the stems aren't separable, so the same pair is
+// applied Mid/Side: boost on Mid (where the vocal sits), cut on Side (where
+// double-tracked guitars live).
 
 #pragma once
 
@@ -31,6 +35,8 @@ public:
     {
         guitarBell.reset();
         vocalBell.reset();
+        sideBell.reset();
+        midBell.reset();
     }
 
     // 0..1 -> 0..kMaxDb. Coefficients are only recalculated when the value
@@ -42,12 +48,26 @@ public:
             return;
         lastDepth = depth;
         const double gainDb = depth * kMaxDb;
-        guitarBell.setCoefficients(BiquadCoefficients::peak(fs, kCentreHz, kQ, -gainDb));
-        vocalBell.setCoefficients(BiquadCoefficients::peak(fs, kCentreHz, kQ, gainDb));
+        const auto cut = BiquadCoefficients::peak(fs, kCentreHz, kQ, -gainDb);
+        const auto boost = BiquadCoefficients::peak(fs, kCentreHz, kQ, gainDb);
+        guitarBell.setCoefficients(cut);
+        vocalBell.setCoefficients(boost);
+        sideBell.setCoefficients(cut);
+        midBell.setCoefficients(boost);
     }
 
     inline void processGuitar(float& l, float& r) noexcept { guitarBell.process(l, r); }
     inline void processVocal(float& l, float& r) noexcept  { vocalBell.process(l, r); }
+
+    // Master-bus form: vocal boost on Mid, guitar cut on Side.
+    inline void processMix(float& l, float& r) noexcept
+    {
+        float mid = 0.5f * (l + r), side = 0.5f * (l - r);
+        mid = midBell.process(mid);
+        side = sideBell.process(side);
+        l = mid + side;
+        r = mid - side;
+    }
 
     static constexpr double kCentreHz = 2500.0;
     static constexpr double kQ        = 1.0;
@@ -57,6 +77,7 @@ private:
     double fs = 48000.0;
     float depth = 1.0f, lastDepth = -1.0f;
     StereoBiquad guitarBell, vocalBell;
+    Biquad sideBell, midBell;
 };
 
 } // namespace rockglue

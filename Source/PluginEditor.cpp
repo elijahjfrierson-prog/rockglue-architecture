@@ -199,10 +199,10 @@ RockGlueEditor::RockGlueEditor(RockGlueProcessor& p)
 
     nodes[0] = { "DRUM BUS", "Smasher  |  FET 4:1  0.05 ms / 50 ms", {} };
     nodes[1] = { "BASS BUS", "Low-End Anchor  |  M/S", {} };
-    nodes[2] = { "GTR / VOX", "The Pocket  |  2.5 kHz Q 1.0", {} };
+    nodes[2] = { "GTR / VOX", "The Pocket  |  2.5 kHz Q 1.0  |  M/S", {} };
     nodes[3] = { "MASTER", "VCA Glue  |  2:1  30 ms  soft knee", {} };
 
-    inputMode.addItemList({ "Stereo Mix", "4-Bus" }, 1);
+    inputMode.addItemList({ "Master", "4-Bus Stems" }, 1);
     addAndMakeVisible(inputMode);
     inputModeLabel.setText("INPUT", juce::dontSendNotification);
     inputModeLabel.setJustificationType(juce::Justification::centredRight);
@@ -265,6 +265,11 @@ void RockGlueEditor::timerCallback()
     const auto frame = processor.getMeterFrame();
     glueMeter.setGainReductionDb(frame.glueGrDb);
     visualizer.push(frame);
+    if (lastFourBusShown != processor.isFourBusSelected())
+    {
+        lastFourBusShown = processor.isFourBusSelected();
+        repaint();
+    }
 }
 
 void RockGlueEditor::paint(juce::Graphics& g)
@@ -279,7 +284,7 @@ void RockGlueEditor::paint(juce::Graphics& g)
     g.drawText("ARCHITECTURE", header.removeFromLeft(150), juce::Justification::centredLeft);
     g.setColour(kDimText);
     g.setFont(juce::Font(juce::FontOptions(11.0f)));
-    g.drawText(processor.isFourBusActive() ? "4-BUS  |  0 samples latency" : "STEREO MIX  |  0 samples latency",
+    g.drawText(processor.isFourBusSelected() ? "4-BUS STEMS  |  0 samples latency" : "MASTER BUS INSERT  |  0 samples latency",
                header.removeFromLeft(220), juce::Justification::centredLeft);
 
     for (const auto& n : nodes)

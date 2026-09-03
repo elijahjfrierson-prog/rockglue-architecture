@@ -58,6 +58,11 @@ public:
             grTargetDb = (1.0f - 1.0f / kRatio) * t * t / (2.0f * kKneeDb);
         }
 
+        // Slow integrator tracks how hard the compressor has been working,
+        // during attack as well as release, so program-dependent memory builds
+        // up on sustained material.
+        autoSlowState = grTargetDb + autoSlowCoeff * (autoSlowState - grTargetDb);
+
         // --- ballistics in the log domain (smooth attack, musical release)
         if (grTargetDb > currentGr)
         {
@@ -65,9 +70,8 @@ public:
         }
         else if (autoRelease)
         {
-            // Two-stage auto release: a fast stage handles transients while a
-            // slow integrator remembers how hard we have been working.
-            autoSlowState = grTargetDb + autoSlowCoeff * (autoSlowState - grTargetDb);
+            // Two-stage auto release: a fast stage handles transients while the
+            // slow memory holds the release open after sustained compression.
             const float fastTarget = std::max(grTargetDb, autoSlowState);
             currentGr = fastTarget + autoFastCoeff * (currentGr - fastTarget);
         }

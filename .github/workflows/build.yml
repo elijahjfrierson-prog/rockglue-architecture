@@ -69,6 +69,12 @@ jobs:
           fi
           cp -R build/RockGlue_artefacts/Release/Standalone/* artifacts/ || true
 
+      - name: Build macOS installer (.pkg)
+        if: runner.os == 'macOS'
+        run: |
+          VERSION=0.2.0 PKG_OUT=artifacts/RockGlue-Architecture-macOS.pkg \
+            bash scripts/package_macos_pkg.sh
+
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
