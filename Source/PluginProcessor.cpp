@@ -5,7 +5,7 @@ using namespace rockglue;
 
 juce::AudioProcessor::BusesProperties RockGlueProcessor::makeBusesProperties()
 {
-    // One stereo main input (mix or drums) plus three optional stereo inputs
+    // One stereo main input (the master 2-bus, or drums in stems mode) plus three optional stereo inputs
     // the host can feed as sidechains. Only the main output exists: all four
     // lines sum into the glue bus.
     return BusesProperties()
@@ -104,7 +104,7 @@ void RockGlueProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mid
     else
     {
         fourBusActive.store(false, std::memory_order_relaxed);
-        engine.processStereoMix(out, numSamples);
+        engine.processMaster(out, numSamples);
     }
 
     // Anything beyond the stereo output pair (aux bus channels the host laid

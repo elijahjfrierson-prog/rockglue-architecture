@@ -10,7 +10,7 @@
 class RockGlueProcessor : public juce::AudioProcessor
 {
 public:
-    // Bus indices. Bus 0 is the main input: the full mix in Stereo Mix mode,
+    // Bus indices. Bus 0 is the main input: the full mix in Master mode,
     // the drums in 4-Bus mode. Buses 1..3 are optional sidechain-style inputs.
     enum Bus { drums = 0, bass = 1, guitars = 2, vocals = 3, numInputBuses = 4 };
 
@@ -46,6 +46,7 @@ public:
     juce::AudioProcessorValueTreeState apvts;
     rockglue::MeterFrame getMeterFrame() const noexcept;
     bool isFourBusActive() const noexcept { return fourBusActive.load(std::memory_order_relaxed); }
+    bool isFourBusSelected() const noexcept { return pInputMode->load() > 0.5f; }
 
 private:
     static BusesProperties makeBusesProperties();

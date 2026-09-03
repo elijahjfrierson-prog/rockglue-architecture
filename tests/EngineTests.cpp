@@ -94,14 +94,14 @@ void testZeroLatency()
           "first non-zero sample at " + std::to_string(first));
     check(RockGlueEngine::kLatencySamples == 0, "engine reports 0 samples latency");
 
-    // Same for stereo-mix mode.
+    // Same for master-bus mode.
     engine.reset();
     std::vector<float> ml = l, mr = r;
-    engine.processStereoMix({ ml.data(), mr.data() }, n);
+    engine.processMaster({ ml.data(), mr.data() }, n);
     first = -1;
     for (int i = 0; i < n; ++i)
         if (std::abs(ml[static_cast<size_t>(i)]) > 1e-4f) { first = i; break; }
-    check(first == 0, "stereo-mix path is also zero latency", "first non-zero sample at " + std::to_string(first));
+    check(first == 0, "master-bus path is also zero latency", "first non-zero sample at " + std::to_string(first));
 }
 
 void testMonoLock()

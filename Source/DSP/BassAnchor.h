@@ -54,9 +54,11 @@ public:
         if (monoLock)
             side = filteredSide;
 
+        // Band filters always run so the Grit control can be swept from zero
+        // without releasing stale filter state.
+        const float band = bandLpf.process(bandHpf2.process(bandHpf1.process(mid)));
         if (grit > 0.0f)
         {
-            const float band = bandLpf.process(bandHpf2.process(bandHpf1.process(mid)));
             const float drive = 1.0f + grit * 5.0f;
             // Small-signal gain of the shaped band is (1 + grit/4): quiet
             // passages keep their tone, hot notes get the harmonics.

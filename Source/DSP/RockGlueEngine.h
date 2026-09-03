@@ -7,9 +7,10 @@
 //   Guitars-> Pocket cut  (-2 dB @ 2.5k)       ----> sum -> VCA Glue -> out
 //   Vocals -> Pocket boost (+2 dB @ 2.5k)     --/
 //
-// Stereo-mix mode runs the one input through Anchor and Smasher (as a
-// parallel bus-smash) into the Glue; the Pocket is skipped because a cut and
-// a boost on the same signal would cancel.
+// Master mode (the default, sitting on the 2-bus) runs the stereo mix through
+// every node in series: Anchor (mono-locked lows, mid grit) -> Pocket in its
+// Mid/Side form (+2 dB @ 2.5k on Mid, -2 dB on Side) -> Smasher as a parallel
+// mix-bus smash -> Glue.
 
 #pragma once
 
@@ -129,8 +130,8 @@ public:
         publish(peakDrumGr, peakGlueGr, midE, sideE, ll, rr, lr, peak);
     }
 
-    // Single stereo mix in place.
-    void processStereoMix(StereoBlock io, int numSamples) noexcept
+    // Master-bus mode: the stereo mix in place.
+    void processMaster(StereoBlock io, int numSamples) noexcept
     {
         float peakDrumGr = 0.0f, peakGlueGr = 0.0f;
         double midE = 0.0, sideE = 0.0, lr = 0.0, ll = 0.0, rr = 0.0;
@@ -140,6 +141,7 @@ public:
         {
             float l = io.left[i], r = io.right[i];
             anchor.processSample(l, r);
+            pocket.processMix(l, r);
             smasher.processSample(l, r);
             peakDrumGr = std::max(peakDrumGr, smasher.getGainReductionDb());
             glue.processSample(l, r);
